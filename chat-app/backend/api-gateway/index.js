@@ -85,6 +85,9 @@ app.use(
   "/chat",
   resolveService("CHAT-SERVICE"),
   createEurekaProxy("CHAT-SERVICE", {
+    pathRewrite: {
+      "^/chat": ""
+    },
     ws: true,
     logLevel: "debug"
   })
@@ -93,7 +96,11 @@ app.use(
 app.use(
   "/auth",
   resolveService("AUTH-SERVICE"),
-  createEurekaProxy("AUTH-SERVICE")
+  createEurekaProxy("AUTH-SERVICE", {
+    pathRewrite: {
+      "^/auth": ""
+    }
+  })
 );
 
 server.listen(PORT, () => {
