@@ -102,25 +102,47 @@ function createEurekaProxy(serviceName, options = {}) {
   return createProxyMiddleware({
     target: "http://127.0.0.1",
     router: (req) => {
+      const targetServiceUrl =
+        req.targetServiceUrl || getServiceUrl(serviceName);
+
       console.log(
-        `Proxy ${serviceName}: ${req.method} ${req.originalUrl} -> ${req.targetServiceUrl}${req.url}`
+        `Proxy ${serviceName}: ${req.method} ${req.originalUrl || req.url} -> ${targetServiceUrl}${req.url}`
       );
 
-      return req.targetServiceUrl;
+      return targetServiceUrl;
     },
     changeOrigin: true,
     on: {
-      error: (error, req, res) => {
-        if (!res.headersSent) {
-          res.writeHead(502, {
-            "Content-Type": "application/json"
-          });
+      error: (error, req, resOrSocket) => {
+        console.error(
+          `Proxy error for ${serviceName}:`,
+          error
+        );
+
+        if (
+          resOrSocket &&
+          typeof resOrSocket.writeHead === "function"
+        ) {
+          if (!resOrSocket.headersSent) {
+            resOrSocket.writeHead(502, {
+              "Content-Type": "application/json"
+            });
+          }
+
+          resOrSocket.end(JSON.stringify({
+            error: `Proxy error for ${serviceName}`,
+            details: error.message
+          }));
+
+          return;
         }
 
-        res.end(JSON.stringify({
-          error: `Proxy error for ${serviceName}`,
-          details: error.message
-        }));
+        if (
+          resOrSocket &&
+          typeof resOrSocket.destroy === "function"
+        ) {
+          resOrSocket.destroy();
+        }
       }
     },
     ...options
