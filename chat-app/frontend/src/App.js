@@ -12,7 +12,8 @@ import ChatWindow from "./components/ChatWindow";
 
 import "./styles/App.css";
 
-const API_URL = "http://10.233.45.231:4000";
+const API_URL =
+  process.env.REACT_APP_API_URL || "http://localhost:4000";
 
 function App() {
 
