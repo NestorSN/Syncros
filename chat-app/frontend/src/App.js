@@ -332,88 +332,106 @@ useEffect(() => {
       password
     ) => {
 
-      const res =
-        await fetch(
-          `${API_URL}/auth/login`,
-          {
-            method:
-            "POST",
+      try {
 
-            headers: {
-              "Content-Type":
-              "application/json"
-            },
+        const res =
+          await fetch(
+            `${API_URL}/auth/login`,
+            {
+              method:
+              "POST",
 
-            body:
-            JSON.stringify({
-              username,
-              password
-            })
-          }
-        );
+              headers: {
+                "Content-Type":
+                "application/json"
+              },
 
-      const data =
-      await res.json();
+              body:
+              JSON.stringify({
+                username,
+                password
+              })
+            }
+          );
 
-      if (data.token) {
+        const data =
+        await res.json();
 
-        localStorage
-        .setItem(
-          "token",
-          data.token
-        );
+        if (!res.ok) {
 
-        localStorage.setItem(
-  "sessionId",
-  data.sessionId
-);
+          alert(
+            data.error ||
+            `Error login: ${res.status}`
+          );
 
-localStorage.setItem(
-  "username",
-  data.username
-);
+          return;
+        }
 
-        setLoggedInUser(
-          data.username
-        );
+        if (data.token) {
 
-// LIMPIAR SOCKET VIEJO
-if (socketRef.current) {
+          localStorage
+          .setItem(
+            "token",
+            data.token
+          );
 
-  socketRef.current.removeAllListeners();
+          localStorage.setItem(
+    "sessionId",
+    data.sessionId
+  );
 
-  socketRef.current.disconnect();
-}
+  localStorage.setItem(
+    "username",
+    data.username
+  );
 
-// NUEVO SOCKET
-socketRef.current =
-  io(API_URL, {
-    path:
-    "/chat/socket.io"
-  });
+          setLoggedInUser(
+            data.username
+          );
 
-// CONNECT
-socketRef.current.on(
-  "connect",
-  () => {
+  // LIMPIAR SOCKET VIEJO
+  if (socketRef.current) {
 
-    console.log(
-      "Socket conectado"
-    );
+    socketRef.current.removeAllListeners();
 
-    socketRef.current.emit(
-      "join",
-      data.username
-    );
+    socketRef.current.disconnect();
   }
-);
 
+  // NUEVO SOCKET
+  socketRef.current =
+    io(API_URL, {
+      path:
+      "/chat/socket.io"
+    });
 
+  // CONNECT
+  socketRef.current.on(
+    "connect",
+    () => {
 
-      } else {
+      console.log(
+        "Socket conectado"
+      );
+
+      socketRef.current.emit(
+        "join",
+        data.username
+      );
+    }
+  );
+
+        } else {
+
+          alert(
+            data.error ||
+            "Login sin token"
+          );
+        }
+
+      } catch (error) {
 
         alert(
-          data.error
+          `No se pudo conectar con el API: ${error.message}`
         );
       }
   }
@@ -427,33 +445,44 @@ socketRef.current.on(
     password
   ) => {
 
-    const res =
-      await fetch(
-      `${API_URL}/auth/register`,
-      {
-        method:
-        "POST",
+    try {
 
-        headers: {
-          "Content-Type":
-          "application/json"
-        },
+      const res =
+        await fetch(
+        `${API_URL}/auth/register`,
+        {
+          method:
+          "POST",
 
-        body:
-        JSON.stringify({
-          username,
-          password
-        })
-      });
+          headers: {
+            "Content-Type":
+            "application/json"
+          },
 
-    const data =
-      await res.json();
+          body:
+          JSON.stringify({
+            username,
+            password
+          })
+        });
 
-    alert(
-      data.message
-      ||
-      data.error
-    );
+      const data =
+        await res.json();
+
+      alert(
+        data.message
+        ||
+        data.error
+        ||
+        `Error registro: ${res.status}`
+      );
+
+    } catch (error) {
+
+      alert(
+        `No se pudo conectar con el API: ${error.message}`
+      );
+    }
   };
 
   // =====================
