@@ -30,7 +30,7 @@ process.env.JWT_EXPIRES || "10m";
 // MONGODB
 // =========================
 mongoose.connect(
-"mongodb://localhost:27017/chat-app"
+process.env.MONGO_URI || "mongodb://localhost:27017/chat-app"
 )
 
 .then(() => {
