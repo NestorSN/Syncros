@@ -49,7 +49,7 @@ app.get("/debug/routes", (req, res) => {
 
 function getInstanceUrl(instance) {
   if (instance.metadata && instance.metadata.baseUrl) {
-    return instance.metadata.baseUrl;
+    return normalizeServiceUrl(instance.metadata.baseUrl);
   }
 
   const host = instance.ipAddr || instance.hostName;
@@ -59,7 +59,20 @@ function getInstanceUrl(instance) {
     throw new Error("Invalid Eureka instance");
   }
 
-  return `http://${host}:${port}`;
+  return normalizeServiceUrl(`http://${host}:${port}`);
+}
+
+function normalizeServiceUrl(url) {
+  if (!url) {
+    throw new Error("Missing service URL");
+  }
+
+  const normalizedUrl =
+    /^https?:\/\//i.test(url)
+      ? url
+      : `https://${url}`;
+
+  return normalizedUrl.replace(/\/$/, "");
 }
 
 function getServiceUrl(serviceName) {
