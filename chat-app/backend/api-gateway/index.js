@@ -77,6 +77,20 @@ function createEurekaProxy(serviceName, options = {}) {
     target: "http://127.0.0.1",
     router: (req) => req.targetServiceUrl,
     changeOrigin: true,
+    on: {
+      error: (error, req, res) => {
+        if (!res.headersSent) {
+          res.writeHead(502, {
+            "Content-Type": "application/json"
+          });
+        }
+
+        res.end(JSON.stringify({
+          error: `Proxy error for ${serviceName}`,
+          details: error.message
+        }));
+      }
+    },
     ...options
   });
 }

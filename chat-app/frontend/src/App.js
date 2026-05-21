@@ -15,6 +15,27 @@ import "./styles/App.css";
 const API_URL =
   process.env.REACT_APP_API_URL || "http://localhost:4000";
 
+async function readApiResponse(res) {
+
+  const text =
+    await res.text();
+
+  try {
+
+    return text
+      ? JSON.parse(text)
+      : {};
+
+  } catch {
+
+    return {
+      error:
+        text ||
+        `Respuesta no JSON del API (${res.status})`
+    };
+  }
+}
+
 function App() {
 
   const socketRef =
@@ -355,7 +376,7 @@ useEffect(() => {
           );
 
         const data =
-        await res.json();
+        await readApiResponse(res);
 
         if (!res.ok) {
 
@@ -467,7 +488,7 @@ useEffect(() => {
         });
 
       const data =
-        await res.json();
+        await readApiResponse(res);
 
       alert(
         data.message
