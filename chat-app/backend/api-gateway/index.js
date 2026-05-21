@@ -34,6 +34,19 @@ app.get("/discovery", (req, res) => {
   );
 });
 
+app.get("/debug/routes", (req, res) => {
+  try {
+    res.json({
+      authServiceUrl: getServiceUrl("AUTH-SERVICE"),
+      chatServiceUrl: getServiceUrl("CHAT-SERVICE")
+    });
+  } catch (error) {
+    res.status(503).json({
+      error: error.message
+    });
+  }
+});
+
 function getInstanceUrl(instance) {
   if (instance.metadata && instance.metadata.baseUrl) {
     return instance.metadata.baseUrl;
@@ -75,7 +88,13 @@ function resolveService(serviceName) {
 function createEurekaProxy(serviceName, options = {}) {
   return createProxyMiddleware({
     target: "http://127.0.0.1",
-    router: (req) => req.targetServiceUrl,
+    router: (req) => {
+      console.log(
+        `Proxy ${serviceName}: ${req.method} ${req.originalUrl} -> ${req.targetServiceUrl}${req.url}`
+      );
+
+      return req.targetServiceUrl;
+    },
     changeOrigin: true,
     on: {
       error: (error, req, res) => {

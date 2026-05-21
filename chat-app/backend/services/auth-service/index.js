@@ -526,6 +526,20 @@ app.get("/health", (req, res) => {
   });
 
 });
+
+app.use((err, req, res, next) => {
+
+  console.error(
+    "Unhandled auth-service error:",
+    err
+  );
+
+  res.status(500).json({
+    error: "Internal auth-service error",
+    details: err.message
+  });
+});
+
 const server = app.listen(PORT, () => {
 
   console.log(
