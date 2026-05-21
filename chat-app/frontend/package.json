@@ -22,6 +22,12 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "core-js",
+      "core-js-pure"
+    ]
+  },
   "eslintConfig": {
     "extends": [
       "react-app",
